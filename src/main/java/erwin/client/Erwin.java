@@ -190,7 +190,7 @@ public class Erwin implements EntryPoint {
         RootPanel.get("wavelength").getElement().setInnerHTML(wlDefault);
         final String sliderDefault = String.valueOf(Const.DEFAULT_WAVELENGTH * 100);
         RootPanel.get("wlSlider").getElement().setPropertyString("value", sliderDefault);
-        currentResolution = Resolution.getDefault();
+        initAllCanvas(Resolution.getDefault());
         resolutionBoxes.get(Resolution.valueOf(currentResolution)).setValue(true);
         addRb.setValue(true);
         relRb.setValue(true);
