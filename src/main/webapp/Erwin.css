@@ -1,20 +1,25 @@
 div#center {
-    width: 400px;
-    margin: 0 auto;
+  width: 400px;
+  margin: 0 auto;
+}
+
+.lab {
+  display: inline-block;
+  width: 70px;
 }
 
 #wlSlider {
-    width: 250px;
+  width: 250px;
 }
 
 .gwt-DialogBox {
-    width: 400px;
+  width: 400px;
 }
 
 .dialogVPanel {
-    margin: 5px;
+  margin: 5px;
 }
 
 .serverResponseLabelError {
-    color: red;
+  color: red;
 }

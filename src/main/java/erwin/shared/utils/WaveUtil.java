@@ -15,9 +15,9 @@ public final class WaveUtil {
                 / (2D * Const.MASS) * Math.pow(wavelength, 2D))
                 * (Math.pow(x, 2D) + Math.pow(y, 2D));
         if (Operator.ADD.equals(op)) {
-            return Complex.fromMagAndPhase(1D, (Const.HALF * phase) - t);            
+            return Complex.fromMagAndPhase(1D, (Const.HALF * phase) - t);
         } else {
-            return Complex.fromMagAndPhase(1D, (Const.HALF * phase) * t);            
+            return Complex.fromMagAndPhase(1D, (Const.HALF * phase) * t);
         }
     }
 }

@@ -3,7 +3,7 @@ package erwin.shared.enums;
 public enum Resolution {
     ONE(1, false), TWO(2, false), THREE(3, true), FOUR(4, false), FIVE(5, false);
 
-    public static final String RESOLUTION_GROUP = "resolution";
+    public static final String GROUP_NAME = "resolution";
 
     private final int resolution;
     private final boolean isDefault;
