@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import erwin.shared.Complex;
 import erwin.shared.Const;
+import erwin.shared.enums.Operator;
 import erwin.shared.enums.Resolution;
 import erwin.shared.utils.ColorUtil;
 import erwin.shared.utils.WaveUtil;
@@ -35,16 +36,18 @@ public class Erwin implements EntryPoint {
     private int bufferHeight;
 
     private final VerticalPanel pan = new VerticalPanel();
+    private final Map<Resolution, RadioButton> resolutionBoxes = new HashMap<Resolution, RadioButton>();
+    private final RadioButton addRb = new RadioButton(Operator.OPERATOR_GROUP, Operator.ADD.toString());
+    private final RadioButton mulRb = new RadioButton(Operator.OPERATOR_GROUP, Operator.MULTIPLY.toString());
     private final Button startButton = new Button("Start");
     private final Button stopButton = new Button("Stop");
-
-    private final Map<Resolution, RadioButton> resolutionBoxes = new HashMap<Resolution, RadioButton>();
-    private final Label statusLabel = new Label();
-    private final Label fpsLabel = new Label();
+    private final Button resetButton = new Button("Reset");
     private Canvas can;
     private Canvas buffer;
     private Context2d context;
     private Context2d bufferContext;
+    private final Label fpsLabel = new Label();
+    private final Label statusLabel = new Label();
 
     private long zeroFrame = 0L;
     private long lastFrame = 0L;
@@ -83,13 +86,13 @@ public class Erwin implements EntryPoint {
         stopButton.addClickHandler(new ClickHandler() {
             @Override public void onClick(final ClickEvent event) {
                 timer.cancel();
-                statusLabel.setText("");
-                fpsLabel.setText("");
+            }
+        });
+        resetButton.addClickHandler(new ClickHandler() {
+            @Override public void onClick(final ClickEvent event) {
                 reset();
             }
         });
-
-        reset();
 
         for (final Resolution resolution : Resolution.values()) {
             final RadioButton rb = new RadioButton(Resolution.RESOLUTION_GROUP, resolution.toString());
@@ -107,18 +110,27 @@ public class Erwin implements EntryPoint {
             resolutionBoxes.put(resolution, rb);
         }
 
+        reset();
+
         final HorizontalPanel radioPan = new HorizontalPanel();
         radioPan.setSpacing(2);
         radioPan.add(new Label("Resolution"));
         for (final Resolution resolution : Resolution.values()) {
             radioPan.add(resolutionBoxes.get(resolution));
         }
+        final HorizontalPanel operatorPan = new HorizontalPanel();
+        operatorPan.setSpacing(2);
+        operatorPan.add(new Label("Operator"));
+        operatorPan.add(addRb);
+        operatorPan.add(mulRb);
         final HorizontalPanel buttonPan = new HorizontalPanel();
         buttonPan.setSpacing(2);
         buttonPan.add(startButton);
         buttonPan.add(stopButton);
+        buttonPan.add(resetButton);
 
         pan.add(radioPan);
+        pan.add(operatorPan);
         pan.add(buttonPan);
         pan.add(can);
         pan.add(fpsLabel);
@@ -160,6 +172,10 @@ public class Erwin implements EntryPoint {
         RootPanel.get("wavelength").getElement().setInnerHTML(wlDefault);
         final String sliderDefault = String.valueOf(Const.DEFAULT_WAVELENGTH * 100);
         RootPanel.get("wlSlider").getElement().setPropertyString("value", sliderDefault);
+        resolutionBoxes.get(Resolution.valueOf(Resolution.getDefault())).setValue(true);
+        addRb.setValue(true);
+        statusLabel.setText("");
+        fpsLabel.setText("");
         clearCanvas();
         offset = 0;
     }
@@ -171,7 +187,8 @@ public class Erwin implements EntryPoint {
         final long tt = Double.valueOf(Double.valueOf(t) / TIME_DIVISOR).longValue();
         for (int x = 0; x < bufferWidth; x++) {
             for (int y = 0; y < bufferHeight; y++) {
-                final Complex c = WaveUtil.calculateWave(x - x0, y - y0, tt, wavelength);
+                final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
+                final Complex c = WaveUtil.calculateWave(x - x0, y - y0, tt, wavelength, op);
                 bufferContext.setFillStyle(ColorUtil.getColor(c));
                 bufferContext.fillRect(x, y, 1D, 1D);
             }
