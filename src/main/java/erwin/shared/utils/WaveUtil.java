@@ -20,8 +20,8 @@ public final class WaveUtil {
             return Complex.fromMagAndPhase(1D, (Const.HALF * phase) * t);
         }
     }
-    
-    public static Complex calculateDual(final int x, final int y, final int centerX, final int centerY, 
+
+    public static Complex calculateDual(final int x, final int y, final int centerX, final int centerY,
             final long t, final double waveNumber) {
         final double distanceToCenter = Math.sqrt(Math.pow(x - centerX, 2D) + Math.pow(y - centerY, 2D));
         final double phase = (distanceToCenter - t) * waveNumber;

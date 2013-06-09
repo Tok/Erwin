@@ -90,7 +90,7 @@ public class Erwin implements EntryPoint {
                 final double wavenumber = Double.valueOf(RootPanel.get("waveNumber").getElement().getInnerHTML());
                 final AnimationMode aniMode = AnimationMode.valueOf(animationBox.getItemText(animationBox.getSelectedIndex()));
                 if (aniMode.equals(AnimationMode.CENTER)) {
-                    drawWaves(t, wavenumber);                    
+                    drawWaves(t, wavenumber);
                 } else if (aniMode.equals(AnimationMode.DUAL)) {
                     drawDual(t, wavenumber);
                 }
@@ -136,9 +136,9 @@ public class Erwin implements EntryPoint {
         for (final AnimationMode mode : AnimationMode.values()) {
             animationBox.addItem(mode.toString());
         }
-        
+
         animationBox.addChangeHandler(new ChangeHandler() {
-            @Override public void onChange(ChangeEvent event) {
+            @Override public void onChange(final ChangeEvent event) {
                 reset();
             }
         });
