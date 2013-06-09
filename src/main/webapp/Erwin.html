@@ -6,8 +6,8 @@
 <title>Erwin</title>
 <script type="text/javascript" src="erwin/erwin.nocache.js"></script>
 <script>
-function updateWavelenght(value) {
-  document.getElementById("wavelength").innerHTML = value / 100;
+function updateWavenumber(value) {
+  document.getElementById("waveNumber").innerHTML = value / 100;
 }
 </script>
 </head>
@@ -22,15 +22,15 @@ function updateWavelenght(value) {
   </noscript>
   <div id="center">
     <div>
-      <span class="lab">Wavelength</span>
-      <input id="wlSlider" type="range" min="0" max="200" step="1"
-        onchange="updateWavelenght(this.value)" />
-      <span id="wavelength"></span>
+      <span class="lab">Wavenumber</span>
+      <input id="waveSlider" type="range" min="0" max="200" step="1"
+        onchange="updateWavenumber(this.value)" />
+      <span id="waveNumber"></span>
     </div>
     <div id="mainContainer"></div>
     <div id="footer">
       <span>Source at <a href="http://github.com/Tok/Erwin">http://github.com/Tok/Erwin</a></span>
-      <span> --- </span>
+      <span> -- </span>
       <span>Works best in <a href="http://www.google.com/chrome/‎">Chrome</a>.</span>
     </div>
   </div>
