@@ -56,6 +56,7 @@ public class Erwin implements EntryPoint {
     private Context2d bufferContext;
     private final Label fpsLabel = new Label();
     private final Label statusLabel = new Label();
+    private Timer timer;
 
     private long zeroFrame = 0L;
     private long lastFrame = 0L;
@@ -72,7 +73,7 @@ public class Erwin implements EntryPoint {
     }
 
     public final void onModuleLoad() {
-        final Timer timer = new Timer() {
+        timer = new Timer() {
             @Override public void run() {
                 final long currentFrame = System.currentTimeMillis();
                 final int diff = Long.valueOf(currentFrame - lastFrame).intValue();
@@ -98,7 +99,7 @@ public class Erwin implements EntryPoint {
         });
         stopButton.addClickHandler(new ClickHandler() {
             @Override public void onClick(final ClickEvent event) {
-                timer.cancel();
+                stop();
             }
         });
         resetButton.addClickHandler(new ClickHandler() {
@@ -198,6 +199,10 @@ public class Erwin implements EntryPoint {
         statusLabel.setText("");
         fpsLabel.setText("");
         clearCanvas();
+    }
+
+    private void stop() {
+        timer.cancel();
     }
 
     private void drawWaves(final long t) {

@@ -12,6 +12,11 @@ div#center {
   width: 250px;
 }
 
+div#footer {
+    position: fixed;
+    bottom: 0px;
+}
+    
 .gwt-DialogBox {
   width: 400px;
 }
