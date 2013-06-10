@@ -14,6 +14,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -42,6 +43,8 @@ public class Erwin implements EntryPoint {
     private final Label operatorLabel = new Label("Operator");
     private final RadioButton addRb = new RadioButton(Operator.GROUP_NAME, Operator.ADD.toString());
     private final RadioButton mulRb = new RadioButton(Operator.GROUP_NAME, Operator.MULTIPLY.toString());
+    private final Label magnitudeLabel = new Label("Magnitude");
+    private final CheckBox useMagnitude = new CheckBox("Calculate");
     private final Button startButton = new Button("Start");
     private final Button stopButton = new Button("Stop");
     private final Button resetButton = new Button("Reset");
@@ -84,7 +87,7 @@ public class Erwin implements EntryPoint {
                 fpsLabel.setText("FPS: " + fps);
                 final long t = Double.valueOf(Double.valueOf(currentFrame - zeroFrame) / TIME_DIVISOR).longValue();
                 final double wavenumber = Double.valueOf(RootPanel.get("waveNumber").getElement().getInnerHTML());
-                final AnimationMode aniMode = AnimationMode.valueOf(animationBox.getItemText(animationBox.getSelectedIndex()));
+                final AnimationMode aniMode = AnimationMode.valueOf(animationBox.getItemText(animationBox.getSelectedIndex()).toUpperCase());
                 if (aniMode.equals(AnimationMode.CENTER)) {
                     drawWaves(t, wavenumber);
                 } else if (aniMode.equals(AnimationMode.DUAL)) {
@@ -112,6 +115,12 @@ public class Erwin implements EntryPoint {
             });
             resolutionBoxes.put(resolution, rb);
         }
+
+        useMagnitude.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override public void onValueChange(final ValueChangeEvent<Boolean> event) {
+                waveCalc = new WaveCalc(x0, y0, event.getValue());
+            }
+        });
 
         startButton.addClickHandler(new ClickHandler() {
             @Override public void onClick(final ClickEvent event) {
@@ -154,6 +163,10 @@ public class Erwin implements EntryPoint {
         operatorPan.add(operatorLabel);
         operatorPan.add(addRb);
         operatorPan.add(mulRb);
+        final HorizontalPanel magnitudePan = new HorizontalPanel();
+        magnitudeLabel.setStyleName(LABEL_STYLE);
+        magnitudePan.add(magnitudeLabel);
+        magnitudePan.add(useMagnitude);
         final HorizontalPanel buttonPan = new HorizontalPanel();
         buttonPan.add(startButton);
         buttonPan.add(stopButton);
@@ -162,6 +175,7 @@ public class Erwin implements EntryPoint {
 
         pan.add(radioPan);
         pan.add(operatorPan);
+        pan.add(magnitudePan);
         pan.add(buttonPan);
         pan.add(can);
         pan.add(fpsLabel);
@@ -179,7 +193,7 @@ public class Erwin implements EntryPoint {
         initPixels();
         x0 = bufferWidth / 2;
         y0 = bufferHeight / 2;
-        waveCalc = new WaveCalc(x0, y0);
+        waveCalc = new WaveCalc(x0, y0, useMagnitude.getValue());
         initCanvas(can, false);
         initCanvas(buffer, true);
         context = can.getContext2d();
@@ -235,7 +249,7 @@ public class Erwin implements EntryPoint {
         for (int x = 0; x < bufferWidth; x++) {
             for (int y = 0; y < bufferHeight; y++) {
                 final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
-                final Complex c = waveCalc.calculateWave(x - x0, y - y0, t, waveNumber, op);
+                final Complex c = waveCalc.calculateWave(x, y, t, waveNumber, op);
                 bufferContext.setFillStyle(ColorUtil.getColor(c));
                 bufferContext.fillRect(x, y, 1D, 1D);
             }

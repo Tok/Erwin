@@ -40,6 +40,6 @@ public enum Resolution {
     }
 
     public final String toString() {
-        return name();
+        return name().substring(0, 1) + name().substring(1, name().length()).toLowerCase();
     }
 }
