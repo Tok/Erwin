@@ -25,7 +25,6 @@ import erwin.shared.Const;
 import erwin.shared.enums.AnimationMode;
 import erwin.shared.enums.Operator;
 import erwin.shared.enums.Resolution;
-import erwin.shared.enums.TimeMode;
 import erwin.shared.utils.ColorUtil;
 import erwin.shared.utils.WaveCalc;
 
@@ -43,9 +42,6 @@ public class Erwin implements EntryPoint {
     private final Label operatorLabel = new Label("Operator");
     private final RadioButton addRb = new RadioButton(Operator.GROUP_NAME, Operator.ADD.toString());
     private final RadioButton mulRb = new RadioButton(Operator.GROUP_NAME, Operator.MULTIPLY.toString());
-    private final Label timeModeLabel = new Label("Time Mode");
-    private final RadioButton relRb = new RadioButton(TimeMode.GROUP_NAME, TimeMode.RELATIVE.toString());
-    private final RadioButton absRb = new RadioButton(TimeMode.GROUP_NAME, TimeMode.ABSOLUTE.toString());
     private final Button startButton = new Button("Start");
     private final Button stopButton = new Button("Stop");
     private final Button resetButton = new Button("Reset");
@@ -60,7 +56,6 @@ public class Erwin implements EntryPoint {
 
     private long zeroFrame = 0L;
     private long lastFrame = 0L;
-    private long frameCount = 0L;
 
     private WaveCalc waveCalc;
     private Complex[] pixels;
@@ -87,8 +82,7 @@ public class Erwin implements EntryPoint {
                 final int diff = Long.valueOf(currentFrame - lastFrame).intValue();
                 final int fps = diff > 0 ? MS_PER_S / diff : FPS_AIM;
                 fpsLabel.setText("FPS: " + fps);
-                frameCount++;
-                final long t = absRb.getValue() ? Double.valueOf(Double.valueOf(currentFrame - zeroFrame) / TIME_DIVISOR).longValue() : frameCount;
+                final long t = Double.valueOf(Double.valueOf(currentFrame - zeroFrame) / TIME_DIVISOR).longValue();
                 final double wavenumber = Double.valueOf(RootPanel.get("waveNumber").getElement().getInnerHTML());
                 final AnimationMode aniMode = AnimationMode.valueOf(animationBox.getItemText(animationBox.getSelectedIndex()));
                 if (aniMode.equals(AnimationMode.CENTER)) {
@@ -160,11 +154,6 @@ public class Erwin implements EntryPoint {
         operatorPan.add(operatorLabel);
         operatorPan.add(addRb);
         operatorPan.add(mulRb);
-        final HorizontalPanel timeModePan = new HorizontalPanel();
-        timeModeLabel.setStyleName(LABEL_STYLE);
-        timeModePan.add(timeModeLabel);
-        timeModePan.add(relRb);
-        timeModePan.add(absRb);
         final HorizontalPanel buttonPan = new HorizontalPanel();
         buttonPan.add(startButton);
         buttonPan.add(stopButton);
@@ -173,7 +162,6 @@ public class Erwin implements EntryPoint {
 
         pan.add(radioPan);
         pan.add(operatorPan);
-        pan.add(timeModePan);
         pan.add(buttonPan);
         pan.add(can);
         pan.add(fpsLabel);
@@ -223,8 +211,6 @@ public class Erwin implements EntryPoint {
         initAllCanvas(Resolution.getDefault());
         resolutionBoxes.get(Resolution.valueOf(currentResolution)).setValue(true);
         addRb.setValue(true);
-        relRb.setValue(true);
-        frameCount = 0L;
         statusLabel.setText("");
         fpsLabel.setText("");
         clearCanvas();
@@ -232,7 +218,6 @@ public class Erwin implements EntryPoint {
 
     private void start() {
         zeroFrame = System.currentTimeMillis();
-        frameCount = 0L;
         timer.scheduleRepeating(MS_PER_S / FPS_AIM);
     }
 
