@@ -58,6 +58,6 @@ public final class WaveCalc {
         final double ph = (distanceToCenter - (Double.valueOf(t) / MANDALA_DIVISOR)) * waveNumber;
         final double phase = op.equals(Operator.ADD) ? oldPhase + ph : oldPhase * ph;
         final double mag = useMagnitude ? calculateIntensity(calculateDistanceToCenter(x, y)) : 1D;
-        return Complex.fromMagAndPhase(mag, phase);
+        return Complex.fromMagAndPhase(old.getPhase() != 0D ? mag : 0D, phase);
     }
 }
