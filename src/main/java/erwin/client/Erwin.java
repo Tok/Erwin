@@ -30,7 +30,7 @@ import erwin.shared.utils.ColorUtil;
 import erwin.shared.utils.WaveCalc;
 
 public class Erwin implements EntryPoint {
-    private static final int WIDTH = 400;
+    private static final int WIDTH = 360; // 480;
     private static final int HEIGHT = WIDTH;
     private static final int FPS_AIM = 250;
     private static final int MS_PER_S = 1000;
@@ -65,8 +65,8 @@ public class Erwin implements EntryPoint {
     private int currentResolution;
     private int bufferWidth;
     private int bufferHeight;
-    private int x0;
-    private int y0;
+    private int w;
+    private int h;
 
     public Erwin() {
         can = Canvas.createIfSupported();
@@ -118,7 +118,7 @@ public class Erwin implements EntryPoint {
 
         useMagnitude.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                waveCalc = new WaveCalc(x0, y0, event.getValue());
+                waveCalc = new WaveCalc(w, h, event.getValue());
             }
         });
 
@@ -191,9 +191,9 @@ public class Erwin implements EntryPoint {
         bufferHeight = HEIGHT / currentResolution;
         pixels = new Complex[bufferWidth * bufferHeight];
         initPixels();
-        x0 = bufferWidth / 2;
-        y0 = bufferHeight / 2;
-        waveCalc = new WaveCalc(x0, y0, useMagnitude.getValue());
+        w = bufferWidth / 2;
+        h = bufferHeight / 2;
+        waveCalc = new WaveCalc(w, h, useMagnitude.getValue());
         initCanvas(can, false);
         initCanvas(buffer, true);
         context = can.getContext2d();
@@ -246,16 +246,16 @@ public class Erwin implements EntryPoint {
     }
 
     private void drawWaves(final long t, final double waveNumber) {
-        for (int x = 0; x < bufferWidth; x++) {
-            for (int y = 0; y < bufferHeight; y++) {
+        for (int x = 0; x <= w; x++) {
+            for (int y = 0; y <= h; y++) {
                 final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
                 final Complex c = waveCalc.calculateWave(x, y, t, waveNumber, op);
                 bufferContext.setFillStyle(ColorUtil.getColor(c));
-                bufferContext.fillRect(x, y, 1D, 1D);
+                paintQuadBuffer(x, y);
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(x0, y0, 1D, 1D); //center
+        bufferContext.fillRect(w, h, 1D, 1D); //center
     }
 
     private void drawDual(final long t, final double waveNumber) {
@@ -264,13 +264,13 @@ public class Erwin implements EntryPoint {
         final int centerY1 = bufferHeight / 2;
         final int centerY2 = bufferHeight / 2;
         final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
-        for (int x = 0; x < bufferWidth; x++) {
-            for (int y = 0; y < bufferHeight; y++) {
+        for (int x = 0; x <= w; x++) {
+            for (int y = 0; y <= h; y++) {
                 final Complex r1 = waveCalc.calculateDual(x, y, centerX1, centerY1, t, waveNumber);
                 final Complex r2 = waveCalc.calculateDual(x, y, centerX2, centerY2, t, waveNumber);
                 final Complex both = op.equals(Operator.MULTIPLY) ? r1.multiply(r2) : r1.add(r2);
                 bufferContext.setFillStyle(ColorUtil.getColor(both));
-                bufferContext.fillRect(x, y, 1D, 1D);
+                paintQuadBuffer(x, y);
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
@@ -280,17 +280,32 @@ public class Erwin implements EntryPoint {
 
     private void drawMandala(final long t, final double waveNumber) {
         final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
-        for (int x = 0; x < bufferWidth; x++) {
-            for (int y = 0; y < bufferHeight; y++) {
+        for (int x = 0; x <= w; x++) {
+            for (int y = 0; y <= h; y++) {
                 final int index = (x * bufferWidth) + y;
                 final Complex old = pixels[index];
                 final Complex n = waveCalc.calculateMandala(x, y, t, waveNumber, op, old);
                 bufferContext.setFillStyle(ColorUtil.getColor(n));
-                bufferContext.fillRect(x, y, 1D, 1D);
+                paintQuadBuffer(x, y);
                 pixels[index] = n;
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(x0, y0, 1D, 1D);
+        bufferContext.fillRect(w, h, 1D, 1D);
+    }
+
+    private void paintQuadBuffer(final int x, final int y) {
+        bufferContext.fillRect(x, y, 1D, 1D);
+        final boolean notLastX = x < w;
+        final boolean notLastY = y < h;
+        if (notLastX) {
+            bufferContext.fillRect(bufferWidth - x, y, 1D, 1D);
+        }
+        if (notLastY) {
+            bufferContext.fillRect(x, bufferHeight - y, 1D, 1D);
+        }
+        if (notLastX && notLastY) {
+            bufferContext.fillRect(bufferWidth - x, bufferHeight - y, 1D, 1D);
+        }
     }
 }
