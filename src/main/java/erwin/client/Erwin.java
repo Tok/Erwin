@@ -62,7 +62,7 @@ public class Erwin implements EntryPoint {
 
     private WaveCalc waveCalc;
     private Complex[] pixels;
-    private int currentResolution;
+    private int res;
     private int bufferWidth;
     private int bufferHeight;
     private int w;
@@ -109,7 +109,7 @@ public class Erwin implements EntryPoint {
                     if (res != 1 || Window.confirm("This may be very slow!")) {
                         initAllCanvas(res);
                     } else {
-                        resolutionBoxes.get(Resolution.valueOf(currentResolution)).setValue(true);
+                        resolutionBoxes.get(Resolution.valueOf(res)).setValue(true);
                     }
                 }
             });
@@ -186,27 +186,25 @@ public class Erwin implements EntryPoint {
     }
 
     private void initAllCanvas(final int resolution) {
-        currentResolution = resolution;
-        bufferWidth = WIDTH / currentResolution;
-        bufferHeight = HEIGHT / currentResolution;
+        res = resolution;
+        bufferWidth = WIDTH / res;
+        bufferHeight = HEIGHT / res;
         pixels = new Complex[bufferWidth * bufferHeight];
         initPixels();
         w = bufferWidth / 2;
         h = bufferHeight / 2;
         waveCalc = new WaveCalc(w, h, useMagnitude.getValue());
-        initCanvas(can, false);
-        initCanvas(buffer, true);
+        initCanvas(can);
+        initCanvas(buffer);
         context = can.getContext2d();
         bufferContext = buffer.getContext2d();
     }
 
-    private void initCanvas(final Canvas c, final boolean isBuffer) {
-        final int width = isBuffer ? bufferWidth : WIDTH;
-        final int height = isBuffer ? bufferHeight : HEIGHT;
-        c.setWidth(width + "px");
-        c.setHeight(height + "px");
-        c.setCoordinateSpaceWidth(width);
-        c.setCoordinateSpaceHeight(height);
+    private void initCanvas(final Canvas c) {
+        c.setWidth(WIDTH + "px");
+        c.setHeight(HEIGHT + "px");
+        c.setCoordinateSpaceWidth(WIDTH);
+        c.setCoordinateSpaceHeight(HEIGHT);
     }
 
     private void clearCanvas() {
@@ -223,7 +221,7 @@ public class Erwin implements EntryPoint {
         final String sliderDefault = String.valueOf(Const.DEFAULT_WAVENUMBER * 100);
         RootPanel.get("waveSlider").getElement().setPropertyString("value", sliderDefault);
         initAllCanvas(Resolution.getDefault());
-        resolutionBoxes.get(Resolution.valueOf(currentResolution)).setValue(true);
+        resolutionBoxes.get(Resolution.valueOf(res)).setValue(true);
         addRb.setValue(true);
         statusLabel.setText("");
         fpsLabel.setText("");
@@ -255,7 +253,7 @@ public class Erwin implements EntryPoint {
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(w, h, 1D, 1D); //center
+        bufferContext.fillRect(w * res, h * res, res, res); //center
     }
 
     private void drawDual(final long t, final double waveNumber) {
@@ -274,8 +272,8 @@ public class Erwin implements EntryPoint {
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(centerX1, centerY1, 1D, 1D);
-        bufferContext.fillRect(centerX2, centerY2, 1D, 1D);
+        bufferContext.fillRect(centerX1 * res, centerY1 * res, res, res);
+        bufferContext.fillRect(centerX2 * res, centerY2 * res, res, res);
     }
 
     private void drawMandala(final long t, final double waveNumber) {
@@ -291,21 +289,23 @@ public class Erwin implements EntryPoint {
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(w, h, 1D, 1D);
+        bufferContext.fillRect(w * res, h * res, res, res);
     }
 
     private void paintQuadBuffer(final int x, final int y) {
-        bufferContext.fillRect(x, y, 1D, 1D);
+        final int realX = x * res;
+        final int realY = y * res;
+        bufferContext.fillRect(realX, realY, res, res);
         final boolean notLastX = x < w;
         final boolean notLastY = y < h;
         if (notLastX) {
-            bufferContext.fillRect(bufferWidth - x, y, 1D, 1D);
+            bufferContext.fillRect(WIDTH - realX, realY, res, res);
         }
         if (notLastY) {
-            bufferContext.fillRect(x, bufferHeight - y, 1D, 1D);
+            bufferContext.fillRect(realX, HEIGHT - realY, res, res);
         }
         if (notLastX && notLastY) {
-            bufferContext.fillRect(bufferWidth - x, bufferHeight - y, 1D, 1D);
+            bufferContext.fillRect(WIDTH - realX, HEIGHT - realY, res, res);
         }
     }
 }
