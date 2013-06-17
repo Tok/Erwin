@@ -9,6 +9,9 @@
 function updateWavenumber(value) {
   document.getElementById("waveNumber").innerHTML = value / 100;
 }
+function updateVelocity(value) {
+  document.getElementById("velocity").innerHTML = value / 100;
+}
 </script>
 </head>
 <body>
@@ -25,7 +28,13 @@ function updateWavenumber(value) {
       <span class="lab">Wavenumber</span>
       <input id="waveSlider" type="range" min="0" max="200" step="1"
         onchange="updateWavenumber(this.value)" />
-      <span id="waveNumber"></span>
+      <span class="val" id="waveNumber"></span>
+    </div>
+    <div>
+      <span class="lab">Velocity</span>
+      <input id="veloSlider" type="range" min="0" max="300" step="1"
+        onchange="updateVelocity(this.value)" />
+      <span class="val" id="velocity"></span>
     </div>
     <div id="mainContainer"></div>
     <div id="footer">

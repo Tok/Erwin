@@ -5,10 +5,20 @@ div#center {
 
 .lab {
   display: inline-block;
+  vertical-align: top;
   width: 80px;
 }
 
+.val {
+  display: inline-block;
+  vertical-align: top;
+}
+
 #waveSlider {
+  width: 250px;
+}
+
+#veloSlider {
   width: 250px;
 }
 

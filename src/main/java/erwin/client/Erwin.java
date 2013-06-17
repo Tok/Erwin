@@ -34,7 +34,6 @@ public class Erwin implements EntryPoint {
     private static final int HEIGHT = WIDTH;
     private static final int FPS_AIM = 250;
     private static final int MS_PER_S = 1000;
-    private static final int TIME_DIVISOR = 100;
     private static final String LABEL_STYLE = "lab";
 
     private final VerticalPanel pan = new VerticalPanel();
@@ -81,19 +80,22 @@ public class Erwin implements EntryPoint {
     public final void onModuleLoad() {
         timer = new Timer() {
             @Override public void run() {
-                final long currentFrame = System.currentTimeMillis();
-                final int diff = Long.valueOf(currentFrame - lastFrame).intValue();
-                final int fps = diff > 0 ? MS_PER_S / diff : FPS_AIM;
-                fpsLabel.setText("FPS: " + fps);
-                final long t = Double.valueOf(Double.valueOf(currentFrame - zeroFrame) / TIME_DIVISOR).longValue();
                 final double wavenumber = Double.valueOf(RootPanel.get("waveNumber").getElement().getInnerHTML());
+                final double velocity = Double.valueOf(RootPanel.get("velocity").getElement().getInnerHTML());
+                final long currentFrame = System.currentTimeMillis();
+                final int fps = MS_PER_S / Long.valueOf(currentFrame - lastFrame).intValue();
+                fpsLabel.setText("FPS: " + fps);
                 final AnimationMode aniMode = AnimationMode.valueOf(animationBox.getItemText(animationBox.getSelectedIndex()).toUpperCase());
-                if (aniMode.equals(AnimationMode.CENTER)) {
-                    drawWaves(t, wavenumber);
-                } else if (aniMode.equals(AnimationMode.DUAL)) {
-                    drawDual(t, wavenumber);
-                } else if (aniMode.equals(AnimationMode.MANDALA)) {
-                    drawMandala(t, wavenumber);
+                if (aniMode.equals(AnimationMode.MANDALA)) {
+                    final double dt = Double.valueOf(currentFrame - lastFrame) * velocity * 0.01D;
+                    drawMandala(dt, wavenumber);
+                } else {
+                    final double t = Double.valueOf(currentFrame - zeroFrame) * velocity * 0.01D;
+                    if (aniMode.equals(AnimationMode.CENTER)) {
+                        drawWaves(t, wavenumber);
+                    } else if (aniMode.equals(AnimationMode.DUAL)) {
+                        drawDual(t, wavenumber);
+                    }
                 }
                 context.drawImage(bufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
                 lastFrame = currentFrame;
@@ -210,7 +212,7 @@ public class Erwin implements EntryPoint {
     private void clearCanvas() {
         bufferContext.beginPath();
         bufferContext.setFillStyle(Const.BLACK);
-        bufferContext.fillRect(0D, 0D, bufferWidth, bufferHeight);
+        bufferContext.fillRect(0D, 0D, WIDTH, HEIGHT);
         bufferContext.closePath();
         context.drawImage(bufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
     }
@@ -218,8 +220,14 @@ public class Erwin implements EntryPoint {
     private void reset() {
         final String wlDefault = String.valueOf(Const.DEFAULT_WAVENUMBER);
         RootPanel.get("waveNumber").getElement().setInnerHTML(wlDefault);
-        final String sliderDefault = String.valueOf(Const.DEFAULT_WAVENUMBER * 100);
-        RootPanel.get("waveSlider").getElement().setPropertyString("value", sliderDefault);
+        final String wlSliderDefault = String.valueOf(Const.DEFAULT_WAVENUMBER * 100);
+        RootPanel.get("waveSlider").getElement().setPropertyString("value", wlSliderDefault);
+
+        final String vDefault = String.valueOf(Const.DEFAULT_VELOCITY);
+        RootPanel.get("velocity").getElement().setInnerHTML(vDefault);
+        final String vSliderDefault = String.valueOf(Const.DEFAULT_VELOCITY * 100);
+        RootPanel.get("veloSlider").getElement().setPropertyString("value", vSliderDefault);
+
         initAllCanvas(Resolution.getDefault());
         resolutionBoxes.get(Resolution.valueOf(res)).setValue(true);
         addRb.setValue(true);
@@ -243,7 +251,7 @@ public class Erwin implements EntryPoint {
         }
     }
 
-    private void drawWaves(final long t, final double waveNumber) {
+    private void drawWaves(final double t, final double waveNumber) {
         for (int x = 0; x <= w; x++) {
             for (int y = 0; y <= h; y++) {
                 final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
@@ -256,7 +264,7 @@ public class Erwin implements EntryPoint {
         bufferContext.fillRect(w * res, h * res, res, res); //center
     }
 
-    private void drawDual(final long t, final double waveNumber) {
+    private void drawDual(final double t, final double waveNumber) {
         final int centerX1 = bufferWidth / 3;
         final int centerX2 = bufferWidth / 3 * 2;
         final int centerY1 = bufferHeight / 2;
@@ -276,13 +284,13 @@ public class Erwin implements EntryPoint {
         bufferContext.fillRect(centerX2 * res, centerY2 * res, res, res);
     }
 
-    private void drawMandala(final long t, final double waveNumber) {
+    private void drawMandala(final double dt, final double waveNumber) {
         final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
         for (int x = 0; x <= w; x++) {
             for (int y = 0; y <= h; y++) {
                 final int index = (x * bufferWidth) + y;
                 final Complex old = pixels[index];
-                final Complex n = waveCalc.calculateMandala(x, y, t, waveNumber, op, old);
+                final Complex n = waveCalc.calculateMandala(x, y, dt, waveNumber, op, old);
                 bufferContext.setFillStyle(ColorUtil.getColor(n));
                 paintQuadBuffer(x, y);
                 pixels[index] = n;
