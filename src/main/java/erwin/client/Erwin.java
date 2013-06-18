@@ -42,16 +42,19 @@ public class Erwin implements EntryPoint {
     private final Label operatorLabel = new Label("Operator");
     private final RadioButton addRb = new RadioButton(Operator.GROUP_NAME, Operator.ADD.toString());
     private final RadioButton mulRb = new RadioButton(Operator.GROUP_NAME, Operator.MULTIPLY.toString());
-    private final Label magnitudeLabel = new Label("Magnitude");
-    private final CheckBox useMagnitude = new CheckBox("Calculate");
+    private final Label optionsLabel = new Label("Options");
+    private final CheckBox useMagnitude = new CheckBox("Magnitude");
+    private final CheckBox useBlur = new CheckBox("Blur");
     private final Button startButton = new Button("Start");
     private final Button stopButton = new Button("Stop");
     private final Button resetButton = new Button("Reset");
     private final ListBox animationBox = new ListBox();
     private Canvas can;
     private Canvas buffer;
+    private Canvas blurBuffer;
     private Context2d context;
     private Context2d bufferContext;
+    private Context2d blurBufferContext;
     private final Label fpsLabel = new Label();
     private final Label statusLabel = new Label();
     private Timer timer;
@@ -70,6 +73,7 @@ public class Erwin implements EntryPoint {
     public Erwin() {
         can = Canvas.createIfSupported();
         buffer = Canvas.createIfSupported();
+        blurBuffer = Canvas.createIfSupported();
         if (can == null) {
             statusLabel.setText("Your browser doesn't support canvas.");
             return;
@@ -97,7 +101,11 @@ public class Erwin implements EntryPoint {
                         drawDual(t, wavenumber);
                     }
                 }
-                context.drawImage(bufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
+                if (useBlur.getValue()) {
+                    context.drawImage(blurBufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
+                } else {
+                    context.drawImage(bufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
+                }
                 lastFrame = currentFrame;
             }
         };
@@ -165,10 +173,11 @@ public class Erwin implements EntryPoint {
         operatorPan.add(operatorLabel);
         operatorPan.add(addRb);
         operatorPan.add(mulRb);
-        final HorizontalPanel magnitudePan = new HorizontalPanel();
-        magnitudeLabel.setStyleName(LABEL_STYLE);
-        magnitudePan.add(magnitudeLabel);
-        magnitudePan.add(useMagnitude);
+        final HorizontalPanel optionsPan = new HorizontalPanel();
+        optionsLabel.setStyleName(LABEL_STYLE);
+        optionsPan.add(optionsLabel);
+        optionsPan.add(useMagnitude);
+        optionsPan.add(useBlur);
         final HorizontalPanel buttonPan = new HorizontalPanel();
         buttonPan.add(startButton);
         buttonPan.add(stopButton);
@@ -177,7 +186,7 @@ public class Erwin implements EntryPoint {
 
         pan.add(radioPan);
         pan.add(operatorPan);
-        pan.add(magnitudePan);
+        pan.add(optionsPan);
         pan.add(buttonPan);
         pan.add(can);
         pan.add(fpsLabel);
@@ -196,17 +205,17 @@ public class Erwin implements EntryPoint {
         w = bufferWidth / 2;
         h = bufferHeight / 2;
         waveCalc = new WaveCalc(w, h, useMagnitude.getValue());
-        initCanvas(can);
-        initCanvas(buffer);
-        context = can.getContext2d();
-        bufferContext = buffer.getContext2d();
+        context = initContext(can, WIDTH, HEIGHT);
+        bufferContext = initContext(buffer, WIDTH, HEIGHT);
+        blurBufferContext = initContext(blurBuffer, bufferWidth, bufferHeight);
     }
 
-    private void initCanvas(final Canvas c) {
-        c.setWidth(WIDTH + "px");
-        c.setHeight(HEIGHT + "px");
-        c.setCoordinateSpaceWidth(WIDTH);
-        c.setCoordinateSpaceHeight(HEIGHT);
+    private Context2d initContext(final Canvas c, final int w, final int h) {
+        c.setWidth(w + "px");
+        c.setHeight(h + "px");
+        c.setCoordinateSpaceWidth(w);
+        c.setCoordinateSpaceHeight(h);
+        return c.getContext2d();
     }
 
     private void clearCanvas() {
@@ -256,8 +265,7 @@ public class Erwin implements EntryPoint {
             for (int y = 0; y <= h; y++) {
                 final Operator op = mulRb.getValue() ? Operator.MULTIPLY : Operator.ADD;
                 final Complex c = waveCalc.calculateWave(x, y, t, waveNumber, op);
-                bufferContext.setFillStyle(ColorUtil.getColor(c));
-                paintQuadBuffer(x, y);
+                paintQuadBuffer(x, y, ColorUtil.getColor(c));
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
@@ -275,8 +283,7 @@ public class Erwin implements EntryPoint {
                 final Complex r1 = waveCalc.calculateDual(x, y, centerX1, centerY1, t, waveNumber);
                 final Complex r2 = waveCalc.calculateDual(x, y, centerX2, centerY2, t, waveNumber);
                 final Complex both = op.equals(Operator.MULTIPLY) ? r1.multiply(r2) : r1.add(r2);
-                bufferContext.setFillStyle(ColorUtil.getColor(both));
-                paintQuadBuffer(x, y);
+                paintQuadBuffer(x, y, ColorUtil.getColor(both));
             }
         }
         bufferContext.setFillStyle(Const.WHITE);
@@ -291,8 +298,7 @@ public class Erwin implements EntryPoint {
                 final int index = (x * bufferWidth) + y;
                 final Complex old = pixels[index];
                 final Complex n = waveCalc.calculateMandala(x, y, dt, waveNumber, op, old);
-                bufferContext.setFillStyle(ColorUtil.getColor(n));
-                paintQuadBuffer(x, y);
+                paintQuadBuffer(x, y, ColorUtil.getColor(n));
                 pixels[index] = n;
             }
         }
@@ -300,20 +306,26 @@ public class Erwin implements EntryPoint {
         bufferContext.fillRect(w * res, h * res, res, res);
     }
 
-    private void paintQuadBuffer(final int x, final int y) {
+    private void paintQuadBuffer(final int x, final int y, final String color) {
+        bufferContext.setFillStyle(color);
+        blurBufferContext.setFillStyle(color);
         final int realX = x * res;
         final int realY = y * res;
         bufferContext.fillRect(realX, realY, res, res);
+        blurBufferContext.fillRect(x, y, 1D, 1D);
         final boolean notLastX = x < w;
         final boolean notLastY = y < h;
         if (notLastX) {
             bufferContext.fillRect(WIDTH - realX, realY, res, res);
+            blurBufferContext.fillRect(bufferWidth - x, y, 1D, 1D);
         }
         if (notLastY) {
             bufferContext.fillRect(realX, HEIGHT - realY, res, res);
+            blurBufferContext.fillRect(x, bufferHeight - y, 1D, 1D);
         }
         if (notLastX && notLastY) {
             bufferContext.fillRect(WIDTH - realX, HEIGHT - realY, res, res);
+            blurBufferContext.fillRect(bufferWidth - x, bufferHeight - y, 1D, 1D);
         }
     }
 }
