@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match>
+    <!-- No locale is OK for converting enum names -->   
+    <Class name="erwin.client.Erwin$1" />
+    <Method name="run" />
+    <Bug pattern="DM_CONVERT_CASE" />
+  </Match>
+  <Match>
+    <!-- No locale is OK for converting enum names -->
+    <Class name="erwin.shared.enums.Operator" />
+    <Method name="toString" />
+    <Bug pattern="DM_CONVERT_CASE" />
+  </Match>
+  <Match>
+    <!-- No locale is OK for converting enum names -->
+    <Class name="erwin.shared.enums.Resolution" />
+    <Method name="toString" />
+    <Bug pattern="DM_CONVERT_CASE" />
+  </Match>
+</FindBugsFilter>
