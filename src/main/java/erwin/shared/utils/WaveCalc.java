@@ -22,7 +22,7 @@ public final class WaveCalc {
     }
 
     private double calculateDistanceToCenter(final int x, final int y, final int cX, final int cY) {
-        return Math.sqrt(Math.pow(x - cX, 2D) + Math.pow(y - cY, 2D));
+        return Math.sqrt(addSquares(x - cX, y - cY));
     }
 
     private double calculateDistanceToCenter(final int x, final int y) {
@@ -32,15 +32,11 @@ public final class WaveCalc {
     public Complex calculateWave(final int x, final int y, final double t,
             final double waveNumber, final Operator op) {
         final double phase =
-                (Math.pow(Const.H_BAR, 2D) * Math.pow(Math.PI, 2D)
-                / (2D * Const.MASS) * Math.pow(waveNumber, 2D))
-                * (Math.pow(x - centerX, 2D) + Math.pow(y - centerY, 2D));
+                Const.H_BAR * Const.H_BAR * Math.PI * Math.PI * addSquares(x - centerX, y - centerY)
+                / (2D * Const.MASS * waveNumber * waveNumber);
         final double mag = useMagnitude ? calculateIntensity(calculateDistanceToCenter(x, y)) : 1D;
-        if (Operator.ADD.equals(op)) {
-            return Complex.fromMagAndPhase(mag, (Const.HALF * phase) - t);
-        } else {
-            return Complex.fromMagAndPhase(mag, (Const.HALF * phase) * t);
-        }
+        final double halfPhase = Const.HALF * phase;
+        return Complex.fromMagAndPhase(mag, Operator.ADD.equals(op) ? halfPhase - t : halfPhase * t);
     }
 
     public Complex calculateDual(final int x, final int y, final int centerX, final int centerY,
@@ -61,5 +57,9 @@ public final class WaveCalc {
         final double phase = op.equals(Operator.ADD) ? oldPhase + dph : oldPhase * dph;
         final double mag = useMagnitude ? calculateIntensity(calculateDistanceToCenter(x, y)) : 1D;
         return Complex.fromMagAndPhase(old.getPhase() != 0D ? mag : 0D, phase);
+    }
+
+    private double addSquares(final double first, final double second) {
+        return (first * first) + (second * second);
     }
 }

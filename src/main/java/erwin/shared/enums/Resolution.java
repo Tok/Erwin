@@ -1,26 +1,17 @@
 package erwin.shared.enums;
 
 public enum Resolution {
-    ONE(1, false), TWO(2, false), THREE(3, true), FOUR(4, false), FIVE(5, false), SIX(6, false);
+    ONE(1), TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6);
 
     public static final String GROUP_NAME = "resolution";
 
     private final int resolution;
-    private final boolean isDefault;
 
-    private Resolution(final int resolution, final boolean isDefault) {
+    private Resolution(final int resolution) {
         this.resolution = resolution;
-        this.isDefault = isDefault;
     }
 
-    public static final int getDefault() {
-        for (final Resolution v : values()) {
-            if (v.isDefault()) {
-                return v.getResolution();
-            }
-        }
-        throw new IllegalArgumentException("Resolution has no default.");
-    }
+    public static final int getDefault() { return THREE.getResolution(); }
 
     public static final Resolution valueOf(final int res) {
         for (final Resolution v : values()) {
@@ -33,10 +24,6 @@ public enum Resolution {
 
     public final int getResolution() {
         return resolution;
-    }
-
-    public final boolean isDefault() {
-        return isDefault;
     }
 
     public final String toString() {

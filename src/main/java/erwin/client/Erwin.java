@@ -108,7 +108,7 @@ public class Erwin implements EntryPoint {
 
         for (final Resolution resolution : Resolution.values()) {
             final RadioButton rb = new RadioButton(Resolution.GROUP_NAME, resolution.toString());
-            rb.setValue(resolution.isDefault());
+            if (Resolution.getDefault() == resolution.getResolution()) { rb.setValue(true); }
             rb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override public void onValueChange(final ValueChangeEvent<Boolean> event) {
                     final int res = resolution.getResolution();
@@ -121,6 +121,7 @@ public class Erwin implements EntryPoint {
             });
             resolutionBoxes.put(resolution, rb);
         }
+        
 
         useMagnitude.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override public void onValueChange(final ValueChangeEvent<Boolean> event) {
