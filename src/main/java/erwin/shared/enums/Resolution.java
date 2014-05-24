@@ -5,25 +5,25 @@ public enum Resolution {
 
     public static final String GROUP_NAME = "resolution";
 
-    private final int resolution;
+    private final int pixels;
 
-    private Resolution(final int resolution) {
-        this.resolution = resolution;
+    private Resolution(final int pixels) {
+        this.pixels = pixels;
     }
 
-    public static final int getDefault() { return THREE.getResolution(); }
+    public final int getPixels() {
+        return pixels;
+    }
 
-    public static final Resolution valueOf(final int res) {
+    public static final int getDefault() { return THREE.getPixels(); }
+
+    public static final Resolution valueOf(final int pixels) {
         for (final Resolution v : values()) {
-            if (res == v.getResolution()) {
+            if (pixels == v.getPixels()) {
                 return v;
             }
         }
-        throw new IllegalArgumentException("Resolution unknown: " + res);
-    }
-
-    public final int getResolution() {
-        return resolution;
+        throw new IllegalArgumentException("No resolution with " + pixels + " pixels defined.");
     }
 
     public final String toString() {

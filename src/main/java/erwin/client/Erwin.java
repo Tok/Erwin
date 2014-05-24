@@ -49,9 +49,9 @@ public class Erwin implements EntryPoint {
     private final Button stopButton = new Button("Stop");
     private final Button resetButton = new Button("Reset");
     private final ListBox animationBox = new ListBox();
-    private Canvas can;
-    private Canvas buffer;
-    private Canvas blurBuffer;
+    private final Canvas can;
+    private final Canvas buffer;
+    private final Canvas blurBuffer;
     private Context2d ctx;
     private Context2d bufferCtx;
     private Context2d blurBufferCtx;
@@ -108,14 +108,13 @@ public class Erwin implements EntryPoint {
 
         for (final Resolution resolution : Resolution.values()) {
             final RadioButton rb = new RadioButton(Resolution.GROUP_NAME, resolution.toString());
-            if (Resolution.getDefault() == resolution.getResolution()) { rb.setValue(true); }
+            if (Resolution.getDefault() == resolution.getPixels()) { rb.setValue(true); }
             rb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                    final int res = resolution.getResolution();
-                    if (res != 1 || Window.confirm("This may be very slow!")) {
-                        initAllCanvas(res);
+                    if (resolution.getPixels() != 1 || Window.confirm("This may be very slow!")) {
+                        initAllCanvas(resolution.getPixels());
                     } else {
-                        resolutionBoxes.get(Resolution.valueOf(res)).setValue(true);
+                        resolutionBoxes.get(resolution).setValue(true);
                     }
                 }
             });
