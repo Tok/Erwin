@@ -52,9 +52,9 @@ public class Erwin implements EntryPoint {
     private Canvas can;
     private Canvas buffer;
     private Canvas blurBuffer;
-    private Context2d context;
-    private Context2d bufferContext;
-    private Context2d blurBufferContext;
+    private Context2d ctx;
+    private Context2d bufferCtx;
+    private Context2d blurBufferCtx;
     private final Label fpsLabel = new Label();
     private final Label statusLabel = new Label();
     private Timer timer;
@@ -101,11 +101,7 @@ public class Erwin implements EntryPoint {
                         drawDual(t, wavenumber);
                     }
                 }
-                if (useBlur.getValue()) {
-                    context.drawImage(blurBufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
-                } else {
-                    context.drawImage(bufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
-                }
+                ctx.drawImage(useBlur.getValue() ? blurBufferCtx.getCanvas() : bufferCtx.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
                 lastFrame = currentFrame;
             }
         };
@@ -205,9 +201,9 @@ public class Erwin implements EntryPoint {
         w = bufferWidth / 2;
         h = bufferHeight / 2;
         waveCalc = new WaveCalc(w, h, useMagnitude.getValue());
-        context = initContext(can, WIDTH, HEIGHT);
-        bufferContext = initContext(buffer, WIDTH, HEIGHT);
-        blurBufferContext = initContext(blurBuffer, bufferWidth, bufferHeight);
+        ctx = initContext(can, WIDTH, HEIGHT);
+        bufferCtx = initContext(buffer, WIDTH, HEIGHT);
+        blurBufferCtx = initContext(blurBuffer, bufferWidth, bufferHeight);
     }
 
     private Context2d initContext(final Canvas c, final int w, final int h) {
@@ -219,11 +215,11 @@ public class Erwin implements EntryPoint {
     }
 
     private void clearCanvas() {
-        bufferContext.beginPath();
-        bufferContext.setFillStyle(Const.BLACK);
-        bufferContext.fillRect(0D, 0D, WIDTH, HEIGHT);
-        bufferContext.closePath();
-        context.drawImage(bufferContext.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
+        bufferCtx.beginPath();
+        bufferCtx.setFillStyle(Const.BLACK);
+        bufferCtx.fillRect(0D, 0D, WIDTH, HEIGHT);
+        bufferCtx.closePath();
+        ctx.drawImage(bufferCtx.getCanvas(), 0D, 0D, WIDTH, HEIGHT);
     }
 
     private void reset() {
@@ -268,8 +264,8 @@ public class Erwin implements EntryPoint {
                 paintQuadBuffer(x, y, ColorUtil.getColor(c));
             }
         }
-        bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(w * res, h * res, res, res); //center
+        bufferCtx.setFillStyle(Const.WHITE);
+        bufferCtx.fillRect(w * res, h * res, res, res); //center
     }
 
     private void drawDual(final double t, final double waveNumber) {
@@ -286,9 +282,9 @@ public class Erwin implements EntryPoint {
                 paintQuadBuffer(x, y, ColorUtil.getColor(both));
             }
         }
-        bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(centerX1 * res, centerY1 * res, res, res);
-        bufferContext.fillRect(centerX2 * res, centerY2 * res, res, res);
+        bufferCtx.setFillStyle(Const.WHITE);
+        bufferCtx.fillRect(centerX1 * res, centerY1 * res, res, res);
+        bufferCtx.fillRect(centerX2 * res, centerY2 * res, res, res);
     }
 
     private void drawMandala(final double dt, final double waveNumber) {
@@ -302,30 +298,30 @@ public class Erwin implements EntryPoint {
                 pixels[index] = n;
             }
         }
-        bufferContext.setFillStyle(Const.WHITE);
-        bufferContext.fillRect(w * res, h * res, res, res);
+        bufferCtx.setFillStyle(Const.WHITE);
+        bufferCtx.fillRect(w * res, h * res, res, res);
     }
 
     private void paintQuadBuffer(final int x, final int y, final String color) {
-        bufferContext.setFillStyle(color);
-        blurBufferContext.setFillStyle(color);
+        bufferCtx.setFillStyle(color);
+        blurBufferCtx.setFillStyle(color);
         final int realX = x * res;
         final int realY = y * res;
-        bufferContext.fillRect(realX, realY, res, res);
-        blurBufferContext.fillRect(x, y, 1D, 1D);
+        bufferCtx.fillRect(realX, realY, res, res);
+        blurBufferCtx.fillRect(x, y, 1D, 1D);
         final boolean notLastX = x < w;
         final boolean notLastY = y < h;
         if (notLastX) {
-            bufferContext.fillRect(WIDTH - realX, realY, res, res);
-            blurBufferContext.fillRect(bufferWidth - x, y, 1D, 1D);
+            bufferCtx.fillRect(WIDTH - realX, realY, res, res);
+            blurBufferCtx.fillRect(bufferWidth - x, y, 1D, 1D);
         }
         if (notLastY) {
-            bufferContext.fillRect(realX, HEIGHT - realY, res, res);
-            blurBufferContext.fillRect(x, bufferHeight - y, 1D, 1D);
+            bufferCtx.fillRect(realX, HEIGHT - realY, res, res);
+            blurBufferCtx.fillRect(x, bufferHeight - y, 1D, 1D);
         }
         if (notLastX && notLastY) {
-            bufferContext.fillRect(WIDTH - realX, HEIGHT - realY, res, res);
-            blurBufferContext.fillRect(bufferWidth - x, bufferHeight - y, 1D, 1D);
+            bufferCtx.fillRect(WIDTH - realX, HEIGHT - realY, res, res);
+            blurBufferCtx.fillRect(bufferWidth - x, bufferHeight - y, 1D, 1D);
         }
     }
 }

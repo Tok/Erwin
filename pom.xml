@@ -10,7 +10,7 @@
 
   <properties>
     <javaVersion>1.7</javaVersion>
-    <gwtVersion>2.6.0</gwtVersion>
+    <gwtVersion>2.6.1</gwtVersion>
     <junitVersion>4.11</junitVersion>
     <!-- http://maven.apache.org/plugins/index.html -->
     <!-- building -->
